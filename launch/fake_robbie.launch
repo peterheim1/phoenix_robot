@@ -1,0 +1,93 @@
+<launch>
+
+  <param name="/use_sim_time" value="false" />
+
+  
+  <!-- The runtime (in seconds) of the fake battery -->
+  <arg name="battery_runtime" default="120" />
+  
+  <!-- Set the name of the map yaml file: can be overridden on the command line. -->
+  <arg name="map" default="set_garage.yaml" />
+
+  <!-- Load the URDF/Xacro model of our robot -->
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find robbie)/urdf/robbie7_fix.xacro'" />
+   
+  <param name="robot_description" command="$(arg urdf_file)" />
+    
+  <node name="arbotix" pkg="arbotix_python" type="arbotix_driver" clear_params="true" output="screen">
+     <rosparam file="$(find rbx1_bringup)/config/fake_turtlebot_arbotix.yaml" command="load" />
+     <param name="sim" value="true"/>
+  </node>
+  
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+      <param name="publish_frequency" type="double" value="20.0" />
+  </node>
+  
+  <!-- We need a static transforms for the wheels -->
+  <node pkg="tf" type="static_transform_publisher" name="odom_left_wheel_broadcaster" args="0 0 0 0 0 0 /base_link /left_wheel_link 100" />
+  <node pkg="tf" type="static_transform_publisher" name="odom_right_wheel_broadcaster" args="0 0 0 0 0 0 /base_link /right_wheel_link 100" />
+  
+  <!-- Run the map server with a blank map -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find robbie)/maps/$(arg map)" />
+  
+  <!-- The move_base node -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" clear_params="true" output="screen">
+     <rosparam file="$(find robbie)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+     <rosparam file="$(find robbie)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+     <rosparam file="$(find robbie)/config/local_costmap_params.yaml" command="load" />
+     <rosparam file="$(find robbie)/config/global_costmap_params.yaml" command="load" />
+     <rosparam file="$(find robbie)/config/base_local_planner_params.yaml" command="load" />
+    
+  </node>
+  
+  <include file="$(find rbx2_utils)/launch/battery_simulator.launch">
+     <arg name="battery_runtime" value="$(arg battery_runtime)" />
+  </include>
+  
+  <!-- Run fake localization compatible with AMCL output -->
+  <node pkg="fake_localization" type="fake_localization" name="fake_localization" output="screen" />
+      
+  <!-- Run a static transform between /odom and /map -->
+  <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
+
+<!-- Run a static transform between /base link and /base footprint -->
+  <node pkg="tf" type="static_transform_publisher" name="footprint_link_broadcaster" args="0 0 0 0 0 0 /base_footprint /base_link 100" />
+
+
+
+  <!-- start Hals voice --> 
+  <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen"/>
+
+  <!-- Launch a node to push terminal input instead of speech recognition -->
+    <node pkg="robbie" type="terminal_input.py" name="terminal_input" output="screen" >
+    </node>
+
+<!-- Launch a node that republishes the output of NLTK as a string (representation of a parse tree) -->
+  <!--<node pkg="nltk_parser" type="nltk_parser.py" name="nltk_parser_service" output="screen" >-->
+   <node pkg="nltk_parser" type="language.py" name="simple_chart_parser" output="screen" >
+        <param name="grammar_path" value="$(find phoenix_robot)" />
+        <param name="grammar_name" value="language.cfg" />
+    </node>
+
+
+<!-- Node that republishes the output of language.py to be useful for meet_greet_demo -->
+    <node pkg="nltk_parser" type="nltk_interpret.py" name="nltk_interpret" output="screen" />
+
+<!-- Node that republishes the output to nltk or chat node 
+    <node pkg="phoenix_robot" type="talk_w.py" name="speach_director" output="screen" />
+-->
+<!-- Node that monitors robbies battery and auto recharge 
+    <node pkg="robbie" type="health_monitor.py" name="health_monitor" output="screen" />
+-->
+<!-- robot task coordinator 
+    <node pkg="phoenix_robot" type="task_cord.py" name="task_coordinator" output="screen" />
+-->
+<!-- Node that monitors robbies battery and auto recharge 
+    <node pkg="robbie" type="health_monitor.py" name="health_monitor" output="screen" />
+-->
+
+
+
+  
+</launch>

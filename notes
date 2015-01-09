@@ -1,0 +1,28 @@
+roslaunch hal fake_hal.launch
+
+rosrun task_coord     move base action server works
+kitchen lounge bathroom 
+and behaviour engine action_node.py      not yet
+
+task_coord will send commands to  movebase action(action_node which in turn will monitor and run tasks)
+
+
+action task Behavior Tree
+ --> STAY_HEALTHY
+     --> CHECK_BATTERY
+     --> RECHARGE
+         --> NAV_DOC_TASK
+         --> AUTODOCK_
+         --> CHARGE_ROBOT
+ --> NAVIGATOR
+     --> GOTO_LOCATION
+
+weather api
+Copy of http://code.google.com/p/python-weather-api/ page.
+Download the latest pywapi library from: https://launchpad.net/python-weather-api/trunk/0.3.8/+download/pywapi-0.3.8.tar.gz
+
+
+sudo pip install feedparser
+sudo pip install untangle
+
+
