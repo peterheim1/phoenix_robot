@@ -4,7 +4,7 @@
   <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen"/>
 
   <!-- Launch a node to push terminal input instead of speech recognition -->
-    <node pkg="robbie" type="terminal_input.py" name="terminal_input" output="screen" >
+    <node pkg="Phoenix_robot" type="terminal_input.py" name="terminal_input" output="screen" >
     </node>
 
    <!-- start the laptop power 
@@ -22,7 +22,7 @@
 
 
 <!-- Node that republishes the output of language.py to the task cord -->
-    <node pkg="nltk_parser" type="nltk_interpret.py" name="nltk_interpret" output="screen" />
+    <node pkg="phoenix_robot" type="nltk_interpret.py" name="nltk_interpret" output="screen" />
 
 <!-- Node that republishes the output to nltk or chat node -->
     <node pkg="phoenix_robot" type="talk_w.py" name="speach_coordinator" output="screen" />
